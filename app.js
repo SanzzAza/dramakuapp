@@ -36,7 +36,7 @@ function homeUrl(page){
   if(currentPlatform==="meloshort")return page===1?`${getAPI()}/home?page=${page}`:`${getAPI()}/new?reset=1`;
   if(currentPlatform==="netshort")return page===1?`${getAPI()}/home?page=${page}`:`${getAPI()}/new`;
   if(currentPlatform==="dramabox")return page===1?`${getAPI()}/home?page=${page}&lang=in`:`${getAPI()}/new?page=${page}&lang=in`;
-  if(currentPlatform==="flickreels")return page===1?`${getAPI()}/home?page=${page}`:`${getAPI()}/new?page=${page}`;
+  if(currentPlatform==="freereels")return page===1?`${getAPI()}/home?page=${page}`:`${getAPI()}/new?page=${page}`;
   return `${getAPI()}/home?page=${page}&lang=${LANG}`;
 }
 function searchUrl(q,page){
@@ -46,7 +46,7 @@ function searchUrl(q,page){
   if(currentPlatform==="meloshort")return `${getAPI()}/search?query=${encodeURIComponent(q)}`;
   if(currentPlatform==="netshort")return `${getAPI()}/search?query=${encodeURIComponent(q)}&page=${page}`;
   if(currentPlatform==="dramabox")return `${getAPI()}/search?q=${encodeURIComponent(q)}&page=${page}&lang=in`;
-  if(currentPlatform==="flickreels")return `${getAPI()}/search?q=${encodeURIComponent(q)}`;
+  if(currentPlatform==="freereels")return `${getAPI()}/search?q=${encodeURIComponent(q)}`;
   return `${getAPI()}/search?q=${encodeURIComponent(q)}&page=${page}&lang=${LANG}`;
 }
 function detailUrl(id){
@@ -56,7 +56,7 @@ function detailUrl(id){
   if(currentPlatform==="meloshort")return `${getAPI()}/detail?drama_id=${id}`;
   if(currentPlatform==="netshort")return `${getAPI()}/detail?id=${id}`;
   if(currentPlatform==="dramabox")return `${getAPI()}/detail?bookId=${id}&lang=in`;
-  if(currentPlatform==="flickreels")return `${getAPI()}/detail?id=${id}`;
+  if(currentPlatform==="freereels")return `${getAPI()}/detail?id=${id}`;
   return `${getAPI()}/detail?id=${id}&lang=${LANG}`;
 }
 function streamUrls(id,ep){
@@ -83,14 +83,14 @@ function streamUrls(id,ep){
   if(currentPlatform==="meloshort"){const chId=window._vidMap?.[id]?.[String(ep)]||"";console.log("[DK] meloshort stream chId="+chId+" ep="+ep+" map=",window._vidMap?.[id]);return chId?[`${getAPI()}/stream?drama_id=${id}&chapter_id=${chId}`]:[`${getAPI()}/stream?drama_id=${id}&chapter_id=${id}&episode=${ep}`];}
   if(currentPlatform==="netshort")return [`${getAPI()}/stream?id=${id}&episode_no=${ep}`,`${getAPI()}/streamv2?id=${id}&ep=${ep}`];
   if(currentPlatform==="dramabox"){const chIdx=ep-1;return [`${getAPI()}/stream?bookId=${id}&chapterIndex=${chIdx}&lang=in`];}
-  if(currentPlatform==="flickreels"){
+  if(currentPlatform==="freereels"){
     // Cek apakah episode sudah di-cache dari detail response
     const hlsCache=window._flickHlsMap?.[id];
     if(hlsCache&&String(ep) in hlsCache){
       // Episode ada di cache (bisa locked="", atau ada URL)
       const hlsUrl=hlsCache[String(ep)];
       // Selalu pakai direct (termasuk jika kosong/locked, biar ditangani di playVideo)
-      return ["__flickreels_direct__:"+hlsUrl];
+      return ["__freereels_direct__:"+hlsUrl];
     }
     // Fallback: tidak ada di cache, fetch stream endpoint
     const chId=window._vidMap?.[id]?.[String(ep)]||"";
@@ -213,7 +213,7 @@ function extractBooks(j){
   }
   // ── FlickReels: {type:"home"|"new", data:[{drama_id, drama_name, cover, ...}]}
   // Atau: {data:{dramas:[...]}} atau {dramas:[...]}
-  if(currentPlatform==="flickreels"){
+  if(currentPlatform==="freereels"){
     if(Array.isArray(j?.data)&&j.data.length&&isIA(j.data))return j.data.filter(isValidBook);
     if(Array.isArray(j?.data?.dramas)&&j.data.dramas.length)return j.data.dramas.filter(isValidBook);
     if(Array.isArray(j?.dramas)&&j.dramas.length)return j.dramas.filter(isValidBook);
@@ -543,7 +543,6 @@ async function loadHome(){
       document.getElementById("gridList").innerHTML=all.map(x=>renderGCard(x)).join("");
     }
   }catch(e){document.getElementById("gridList").innerHTML='<div class="loading" style="grid-column:1/-1">Gagal load</div>';}
-  loadGrid(true);
   renderContinueSection();
 }
 async function loadGrid(append,kws){
@@ -637,7 +636,7 @@ async function loadDetail(id){
     if(dd?._chapterList)_vlist=dd._chapterList;
     else if(dd?._episodeList)_vlist=dd._episodeList;
     else if(dd?.chapters&&Array.isArray(dd.chapters))_vlist=dd.chapters;
-    else if(currentPlatform==="flickreels"&&Array.isArray(dd?.episodes))_vlist=dd.episodes;
+    else if(currentPlatform==="freereels"&&Array.isArray(dd?.episodes))_vlist=dd.episodes;
     else if(currentPlatform==="meloshort"&&Array.isArray(dd?.episodes))_vlist=dd.episodes;
     else if(dd?.episode_list&&Array.isArray(dd.episode_list))_vlist=dd.episode_list;
     else if(dd?.videos&&Array.isArray(dd.videos))_vlist=dd.videos;
@@ -651,7 +650,7 @@ async function loadDetail(id){
         const vidId=(v.chapter_id||v.shortPlayId||v.vid||v.video_id||v.vid_id||v.play_id||v.episode_id||v.id);
         if(epNum!=null&&vidId) window._vidMap[id][String(epNum)]=String(vidId);
         // FlickReels: simpan hls_url dan lock status
-        if(currentPlatform==="flickreels"&&epNum!=null){
+        if(currentPlatform==="freereels"&&epNum!=null){
           window._flickHlsMap[id][String(epNum)]=v.hls_url||"";
           window._flickLockedMap[id][String(epNum)]=!!(v.is_locked||!v.is_free||!v.hls_url);
         }
@@ -704,7 +703,7 @@ async function loadDetail(id){
           ${Array.from({length:Number(total)},(_,i)=>{
             const ep=i+1;
             const isActive=ep===currentEp&&id===currentDramaId;
-            const isLocked=currentPlatform==="flickreels"&&window._flickLockedMap?.[id]?.[String(ep)];
+            const isLocked=currentPlatform==="freereels"&&window._flickLockedMap?.[id]?.[String(ep)];
             return`<div class="ep-btn${isActive?' active-ep':''}${isLocked?' ep-locked':''}" id="epbtn-${ep}" onclick="playVideo('${id}',${ep},${total})">${isLocked?'🔒 ':''}EP ${ep}</div>`;
           }).join("")}
         </div>
@@ -887,7 +886,7 @@ function extractStreamUrl(json){
   }
   // ── FlickReels /stream: {type:"stream", data:{hls_url, drama_name, cover, ...}}
   // Also handles: {url, stream_url, play_url, data:{url,...}}
-  if(currentPlatform==="flickreels"){
+  if(currentPlatform==="freereels"){
     const dd=json?.data||json;
     const u=dd?.hls_url||dd?.url||dd?.stream_url||dd?.play_url||dd?.video_url||dd?.videoUrl||dd?.playUrl||dd?.m3u8||dd?.m3u8_url||"";
     if(u&&u.startsWith("http"))return u;
@@ -1072,7 +1071,7 @@ function _tryHls(src){
     xhrSetup:function(xhr){
       xhr.withCredentials=false;
       // FlickReels CDN butuh referrer yang valid
-      if(currentPlatform==="flickreels"){
+      if(currentPlatform==="freereels"){
         try{xhr.setRequestHeader("Referrer-Policy","no-referrer-when-downgrade");}catch(e){}
       }
     }
@@ -1141,7 +1140,7 @@ function doPlay(src){
   const isM3u8=src.includes(".m3u8")||src.includes("/m3u8");
   console.log("[DK] doPlay isM3u8="+isM3u8+" platform="+currentPlatform+" src="+src.slice(0,80));
   // FlickReels: skip HLS.js, pakai native WebView HLS langsung
-  if(isM3u8&&currentPlatform==="flickreels"){
+  if(isM3u8&&currentPlatform==="freereels"){
     _playNativeWithProxyFallback(src);
     return;
   }
@@ -1398,8 +1397,8 @@ async function playVideo(id,ep,total,resumeTime){
     const candidates=streamUrls(id,ep);
     let json=null,url="";
     // FlickReels: HLS URL langsung dari detail cache, tidak perlu fetch
-    if(candidates.length===1&&candidates[0].startsWith("__flickreels_direct__:")){
-      url=candidates[0].replace("__flickreels_direct__:","");
+    if(candidates.length===1&&candidates[0].startsWith("__freereels_direct__:")){
+      url=candidates[0].replace("__freereels_direct__:","");
       if(!url){
         // Episode locked di detail, tapi coba fetch stream endpoint juga (API kadang unlock)
         const chId=window._vidMap?.[id]?.[String(ep)]||"";
