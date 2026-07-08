@@ -143,17 +143,10 @@ function getCover(x){
   if(!u&&Array.isArray(x?.video_list)&&x.video_list.length){
     u=x.video_list[0]?.cover||"";
   }
-  // Fix: Semua platform bisa pakai format markdown link [URL] atau [URL](URL)
-  // Strip brackets dari hasil pick juga, bukan cuma di fallback
+  // Fix: Semua platform pakai markdown link [URL](URL) atau [URL]
+  // Strip semua []() untuk dapat URL clean
   if(u){
-    u=String(u);
-    // Format: [https://...] atau [https://...](https://...)
-    if(u.startsWith("[")){
-      // Extract URL from [URL] or [URL](URL) format
-      const match=u.match(/^\[([^\]]+)\](?:\([^)]+\))?$/);
-      if(match)u=match[1].trim();
-      else u=u.replace(/^\[|\]$/g,"").trim();
-    }
+    u=String(u).replace(/^\[|\]$/g,"").replace(/\]\([^)]+\)/g,"");
   }
   return fixImgUrl(strVal(u))||"";
 }
