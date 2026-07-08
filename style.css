@@ -95,9 +95,9 @@ body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;disp
   padding:4px 16px;transition:color .2s,transform .15s;min-width:60px;
 }
 .nav-btn:active{transform:scale(.9)}
-.nav-btn.active{color:var(--text)}
+.nav-btn.active{color:var(--lime)}
 .nav-btn svg{width:22px;height:22px}
-.nav-btn.active svg{stroke:var(--accent)}
+.nav-btn.active svg{stroke:var(--lime)}
 .nav-center{
   background:linear-gradient(135deg,var(--accent),var(--accent2));
   border:0;width:52px;height:52px;border-radius:50%;
@@ -307,6 +307,10 @@ video::-webkit-media-text-track-display{
 .plat-sheet.show{transform:translateY(0)}
 .plat-drag{width:36px;height:4px;background:rgba(255,255,255,.15);border-radius:2px;margin:14px auto 6px}
 .plat-header{display:flex;align-items:center;justify-content:space-between;padding:14px 0 4px}
+.plat-search-wrap{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:12px 14px;margin-top:10px;color:var(--muted2)}
+.plat-search-wrap svg{flex-shrink:0}
+.plat-search-input{flex:1;background:none;border:0;outline:0;color:var(--text);font-family:'Nunito',sans-serif;font-size:14px;font-weight:600}
+.plat-search-input::placeholder{color:var(--muted)}
 .plat-title{font-size:19px;font-weight:900}
 .plat-close{width:34px;height:34px;border-radius:50%;background:var(--bg3);border:0;color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer}
 .plat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:16px 0 20px;overflow-y:auto;scrollbar-width:none}
@@ -371,6 +375,8 @@ video::-webkit-media-text-track-display{
 .g-card-progress-fill{height:100%;background:var(--accent);border-radius:0 0 12px 12px;
   transition:width .3s}
 .g-card-img-wrap{position:relative;width:100%;aspect-ratio:2/3}
+.g-card-plat{position:absolute;top:6px;left:6px;background:var(--lime);color:#0d0d14;font-size:9px;font-weight:900;letter-spacing:.3px;padding:3px 8px;border-radius:6px;text-transform:uppercase;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.g-card-ep-badge{position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);color:#fff;font-size:9px;font-weight:800;padding:3px 8px;border-radius:6px}
 /* ── CONTINUE WATCHING SECTION di HOME ── */
 .continue-section{padding:0 16px 20px}
 .continue-h-card{flex-shrink:0;width:130px;cursor:pointer;transition:transform .2s cubic-bezier(.34,1.56,.64,1);position:relative}

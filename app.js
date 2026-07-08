@@ -465,21 +465,6 @@ function renderContinueSection(){
     </div>`;
   }).join('');
 }
-/* ── PATCH renderGCard supaya ada progress bar ── */
-function renderGCard(x){
-  const id=getId(x),cover=getCover(x),title=cleanTitle(getTitle(x));
-  const dub=isDub(getTitle(x));
-  const cd=continueData[id];
-  const pct=cd?getContinuePct(cd):0;
-  return`<div class="g-card" onclick="loadDetail('${id}')">
-    <div class="g-card-img-wrap">
-      <img class="g-card-img" src="${cover}" loading="lazy" referrerpolicy="no-referrer" onerror="this.src='';this.style.background='#1c1c2e'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:12px">
-      ${pct>0?`<div class="g-card-progress"><div class="g-card-progress-fill" style="width:${pct}%"></div></div>`:''}
-    </div>
-    <div class="g-card-title">${title}</div>
-    ${dub?'<div class="g-card-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-1px"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg> DUB</div>':''}
-  </div>`;
-}
 /* ── RENDER ── */
 function renderHCard(x){
   const id=getId(x),cover=getCover(x),title=cleanTitle(getTitle(x));
@@ -493,8 +478,17 @@ function renderHCard(x){
 function renderGCard(x){
   const id=getId(x),cover=getCover(x),title=cleanTitle(getTitle(x));
   const dub=isDub(getTitle(x));
+  const cd=continueData[id];
+  const pct=cd?getContinuePct(cd):0;
+  const ep=x.serial_count||x.episode_count||x.last_chapter_index||x.chapterCount||x.totalChapter||"";
+  const platLabel=PLATFORMS[currentPlatform]?.label||"";
   return`<div class="g-card" onclick="loadDetail('${id}')">
-    <img class="g-card-img" src="${cover}" loading="lazy" referrerpolicy="no-referrer" onerror="this.src='';this.style.background='#1c1c2e'">
+    <div class="g-card-img-wrap">
+      <img class="g-card-img" src="${cover}" loading="lazy" referrerpolicy="no-referrer" onerror="this.src='';this.style.background='#1c1c2e'">
+      ${platLabel?`<span class="g-card-plat">${platLabel}</span>`:''}
+      ${ep?`<span class="g-card-ep-badge">${ep} EP</span>`:''}
+      ${pct>0?`<div class="g-card-progress"><div class="g-card-progress-fill" style="width:${pct}%"></div></div>`:''}
+    </div>
     <div class="g-card-title">${title}</div>
     ${dub?'<div class="g-card-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-1px"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg> DUB</div>':''}
   </div>`;
@@ -1503,15 +1497,23 @@ function renderPlatformGrid(){
   grid.innerHTML=Object.keys(PLATFORMS).map(key=>{
     const p=PLATFORMS[key];
     const active=key===currentPlatform;
-    return `<div class="plat-item${active?" active":""}" onclick="selectPlatform('${key}')">
+    return `<div class="plat-item${active?" active":""}" data-name="${p.label.toLowerCase()}" onclick="selectPlatform('${key}')">
       <div class="plat-icon" style="background:${p.color}"><img src="${p.icon}" alt="${p.label}" loading="lazy" referrerpolicy="no-referrer">${active?'<span class="plat-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>':''}</div>
       <span class="plat-name">${p.label}</span>
       ${active?'<span class="plat-active-label">Aktif</span>':''}
     </div>`;
   }).join("");
 }
+function filterPlatformGrid(q){
+  const query=(q||"").trim().toLowerCase();
+  document.querySelectorAll("#platGrid .plat-item").forEach(el=>{
+    el.style.display = !query || el.dataset.name.includes(query) ? "" : "none";
+  });
+}
 function openPlatformSheet(){
   renderPlatformGrid();
+  const si=document.getElementById("platSearchInput");
+  if(si)si.value="";
   const bd=document.getElementById("platBackdrop"),sh=document.getElementById("platSheet");
   bd.style.display="block";sh.style.display="flex";
   requestAnimationFrame(()=>{bd.classList.add("show");sh.classList.add("show");});
