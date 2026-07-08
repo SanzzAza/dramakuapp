@@ -138,6 +138,11 @@ function getCover(x){
   const y=mbObj(x);
   let u=pick(y,["drama_cover","thumb_url","cover","cover_url","coverUrl","verticalCover","horizontalCover","bookCover","bookDetailCover","thumb","poster","image","img","coverImg","cover_img","verticalImage","horizontalImage","coverImage","cover_image","posterUrl","poster_url","thumbnailUrl","thumbnail","imageUrl","videoCover","displayCover","smallCover","largeCover","display_url","displayUrl","coverUrlNew","coverImgUrl"]);
   if(!u)u=pick(x,["drama_cover","cover","coverUrl","verticalCover","horizontalCover","image","poster","thumb","verticalImage","horizontalImage","coverImage","cover_image","posterUrl","poster_url","thumbnailUrl","thumbnail","imageUrl","videoCover","displayCover","smallCover","largeCover","display_url","displayUrl","coverUrlNew","coverImgUrl"]);
+  // Melolo: cover tidak ada di root, cuma di video_list[].cover per episode
+  // Fallback: ambil cover dari episode pertama
+  if(!u&&Array.isArray(x?.video_list)&&x.video_list.length){
+    u=x.video_list[0]?.cover||"";
+  }
   return fixImgUrl(strVal(u))||"";
 }
 function getDesc(x){
@@ -640,7 +645,8 @@ async function loadDetail(id){
     else if(currentPlatform==="meloshort"&&Array.isArray(dd?.episodes))_vlist=dd.episodes;
     else if(dd?.episode_list&&Array.isArray(dd.episode_list))_vlist=dd.episode_list;
     else if(dd?.videos&&Array.isArray(dd.videos))_vlist=dd.videos;
-    else if(dd?.video_list&&Array.isArray(dd.video_list))_vlist=dd.video_list;
+    else if(Array.isArray(dd?.video_list)&&dd.video_list.length)_vlist=dd.video_list;
+    else if(Array.isArray(dd?.chapterList)&&dd.chapterList.length)_vlist=dd.chapterList;
     else if(dd?.chapterList&&Array.isArray(dd.chapterList))_vlist=dd.chapterList;
     if(Array.isArray(_vlist)&&_vlist.length){
       _vlist.forEach((v,i)=>{
