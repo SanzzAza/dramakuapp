@@ -143,6 +143,10 @@ function getCover(x){
   if(!u&&Array.isArray(x?.video_list)&&x.video_list.length){
     u=x.video_list[0]?.cover||"";
   }
+  // Fix: Melolo cover pakai format markdown link [URL], strip bracket-nya
+  if(u&&typeof u==="string"&&u.startsWith("[")){
+    u=u.replace(/^\[|\]$/g,"").trim();
+  }
   return fixImgUrl(strVal(u))||"";
 }
 function getDesc(x){
@@ -626,7 +630,16 @@ async function loadDetail(id){
       total=Number(dd?.info?.totalEpisodes||dd?.info?.updateEpisode||dd?.episodes?.dramaListResponseList?.length||(Array.isArray(dd?.episodes)?dd.episodes.length:dd?.episodes)||dd?.total_episodes||dd?.chapters_total||dd?.episode_count||dd?.serial_count||dd?.totalEpisodes||dd?.chapterCount||dd?.totalChapter||dd?.chapter_count||dd?.episodeCount||dd?.totalEpisode||dd?.seasons?.[0]?.episodeCount||0)||0;
       if(!total)total=(currentPlatform==="moviebox")?24:80;
     }
-    const cover=fixImgUrl(getCover(dd)||dd?.video_list?.[0]?.cover||dd?.videos?.[0]?.cover||""),title=cleanTitle(getTitle(dd)),desc=getDesc(dd);
+    // Extract cover, handle Melolo markdown link format [URL]
+    let _rawCover=getCover(dd)||"";
+    if(_rawCover&&_rawCover.startsWith("["))_rawCover=_rawCover.replace(/^\[|\]$/g,"").trim();
+    // Fallback: video_list[0].cover (also strip brackets if needed)
+    if(!_rawCover&&Array.isArray(dd?.video_list)&&dd.video_list.length){
+      let fb=dd.video_list[0]?.cover||"";
+      if(fb&&fb.startsWith("["))fb=fb.replace(/^\[|\]$/g,"").trim();
+      _rawCover=fb;
+    }
+    const cover=fixImgUrl(_rawCover||""),title=cleanTitle(getTitle(dd)),desc=getDesc(dd);
     const _detailDebug='';
     // Simpan mapping vid_id per episode untuk playVideo
     window._vidMap=window._vidMap||{};
