@@ -136,8 +136,8 @@ function mbObj(x){return (currentPlatform==="moviebox" && x?.subject) ? x.subjec
 function getTitle(x){const y=mbObj(x);return pick(y,["drama_name","name","title","content","drama_title","book_name","bookName","series_name"])||pick(x,["drama_name","content","title"])||"Tanpa Judul"}
 function getCover(x){
   const y=mbObj(x);
-  let u=pick(y,["drama_cover","thumb_url","cover","cover_url","coverUrl","verticalCover","horizontalCover","bookCover","bookDetailCover","thumb","poster","image","img","coverImg","cover_img","verticalImage","horizontalImage"]);
-  if(!u)u=pick(x,["drama_cover","cover","coverUrl","verticalCover","horizontalCover","image","poster","thumb","verticalImage","horizontalImage"]);
+  let u=pick(y,["drama_cover","thumb_url","cover","cover_url","coverUrl","verticalCover","horizontalCover","bookCover","bookDetailCover","thumb","poster","image","img","coverImg","cover_img","verticalImage","horizontalImage","coverImage","cover_image","posterUrl","poster_url","thumbnailUrl","thumbnail","imageUrl","videoCover","displayCover","smallCover","largeCover","display_url","displayUrl","coverUrlNew","coverImgUrl"]);
+  if(!u)u=pick(x,["drama_cover","cover","coverUrl","verticalCover","horizontalCover","image","poster","thumb","verticalImage","horizontalImage","coverImage","cover_image","posterUrl","poster_url","thumbnailUrl","thumbnail","imageUrl","videoCover","displayCover","smallCover","largeCover","display_url","displayUrl","coverUrlNew","coverImgUrl"]);
   return fixImgUrl(strVal(u))||"";
 }
 function getDesc(x){
@@ -1139,9 +1139,10 @@ function doPlay(src){
   vid.referrerPolicy="no-referrer-when-downgrade";
   const isM3u8=src.includes(".m3u8")||src.includes("/m3u8");
   console.log("[DK] doPlay isM3u8="+isM3u8+" platform="+currentPlatform+" src="+src.slice(0,80));
-  // FlickReels: skip HLS.js, pakai native WebView HLS langsung
+  // FreeReels: pakai _playNativeDirect (ada H265 detect + auto fallback HLS.js)
+  // Jangan pakai _playNativeWithProxyFallback karena FreeReels CDN beda dari FlickReels
   if(isM3u8&&currentPlatform==="freereels"){
-    _playNativeWithProxyFallback(src);
+    _playNativeDirect(src);
     return;
   }
   if(isM3u8&&typeof Hls!=="undefined"){
